@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccountManager.Data\AccountManager.Data.csproj" />
+    <ProjectReference Include="..\AccountManager.Models\AccountManager.Models.csproj" />
+    <ProjectReference Include="..\AccountManager.Services\AccountManager.Services.csproj" />
+    <ProjectReference Include="..\Helpers\AccountManager.Helpers.csproj" />
+  </ItemGroup>
+
+</Project>

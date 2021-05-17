@@ -30,13 +30,19 @@ namespace AccountManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddCors();
+             
             DependencyInjections.Register(services);
             services.AddDbContext<AccountManagerContext>(
                 o => o.UseSqlServer(Configuration.GetConnectionString(nameof(AccountManagerContext))));
-            services.AddCors();
-            var sharedKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(Configuration["AppSettings:Secret"]));
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+            // configure jwt authentication
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+
+            
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -49,7 +55,7 @@ namespace AccountManager
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = sharedKey,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
 
                     ValidateIssuer = false,
                     ValidateAudience = false,
@@ -68,6 +74,7 @@ namespace AccountManager
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -75,9 +82,10 @@ namespace AccountManager
 
             app.UseCors(o => o
             .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            );
+             .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true)); // allow credentials
+
             app.UseHttpsRedirection();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -87,9 +95,8 @@ namespace AccountManager
             });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

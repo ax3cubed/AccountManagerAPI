@@ -67,8 +67,9 @@ namespace AccountManager.Api.Controllers
             var token = _jwtService.GenerateSecurityToken(result);
 
             Response.Headers.Add("x-accountManager-auth-token", token);
+            result.Token = token;
            
-            return Ok(new ResponseMessage { Data=token,Code="0", Message = "Login Sucesful"});
+            return Ok(new ResponseMessage { Data=result,Code="0", Message = "Login Succesful"});
         }
 
         [Authorize]

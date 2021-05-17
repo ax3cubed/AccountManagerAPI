@@ -10,5 +10,7 @@ namespace AccountManager.Models.ViewModel
         public string EmailAddress { get; set; }
         public string FullName { get; set; }
 
+        public string Token { get; set; }
+
     }
 }
